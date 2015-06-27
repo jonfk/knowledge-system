@@ -1,0 +1,24 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/codegangsta/cli",
+			"repository": "https://github.com/codegangsta/cli",
+			"revision": "ad480243a8a6cda30acf7cd999ea3e5142154fde",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/davecgh/go-spew/spew",
+			"repository": "https://github.com/davecgh/go-spew",
+			"revision": "f9f629a1d082960e5d1747f33c2b378612615fea",
+			"branch": "master",
+			"path": "/spew"
+		},
+		{
+			"importpath": "github.com/satori/go.uuid",
+			"repository": "https://github.com/satori/go.uuid",
+			"revision": "afe1e2ddf0f05b7c29d388a3f8e76cb15c2231ca",
+			"branch": "master"
+		}
+	]
+}
