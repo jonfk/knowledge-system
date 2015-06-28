@@ -44,4 +44,5 @@ Use the help command to get instructions:
 ```bash
 $ ./bin/system -h
 $ ./bin/system test -h
+$ ./bin/system concurrent -h
 ```
