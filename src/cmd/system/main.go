@@ -226,7 +226,8 @@ func ConcurrentTestSimulation(c *cli.Context) {
 						collect <- graph[childId]
 					}
 				default:
-					//fmt.Printf("x: %d", x)
+					//time.Sleep(100 * time.Millisecond)
+
 				}
 			}
 			waitGroup.Done()
