@@ -72,12 +72,12 @@ func main() {
 				cli.IntFlag{
 					Name:  "routines, r",
 					Value: 5,
-					Usage: "The number of routines to be used by the simulation. Best to set >= procs",
+					Usage: "The number of routines to be used by the simulation. Best to set <= procs",
 				},
 				cli.IntFlag{
 					Name:  "buffer, b",
 					Value: 100,
-					Usage: "The buffer size used by the communication channel between goroutines.",
+					Usage: "The buffer size used by the communication channel between goroutines. If not set it is scaled to graph size: size * 10",
 				},
 				cli.StringFlag{
 					Name:  "input, i",
@@ -160,6 +160,7 @@ func ConcurrentTestSimulation(c *cli.Context) {
 	depth := c.Int("depth")
 	size := c.Int("size")
 	var processors int = -1
+	channelBufferSize := c.Int("buffer")
 
 	if c.IsSet("input") {
 		graph = load(c.String("input"))
@@ -185,7 +186,9 @@ func ConcurrentTestSimulation(c *cli.Context) {
 
 	var actives map[string]*LabelNode = make(map[string]*LabelNode)
 
-	channelBufferSize := c.Int("buffer")
+	if !c.IsSet("buffer") {
+		channelBufferSize = size * 10
+	}
 	collect := make(chan *LabelNode, channelBufferSize)
 	sendWorkers := make(chan *LabelNode, channelBufferSize)
 
