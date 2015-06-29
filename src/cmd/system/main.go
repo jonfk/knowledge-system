@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
-	//"github.com/davecgh/go-spew/spew"
+	// "github.com/davecgh/go-spew/spew"
 	"os"
 	"runtime"
 	"sync"
@@ -206,33 +206,40 @@ func ConcurrentTestSimulation(c *cli.Context) {
 	// or any nodes
 	go func(collect <-chan *LabelNode, sendWorkers chan<- *LabelNode) {
 		for {
-			newActive := <-collect
-			if !newActive.Visited {
-				newActive.Visited = true
-				actives[newActive.Label] = newActive
-				sendWorkers <- newActive
+			select {
+			case newActive := <-collect:
+				if !newActive.Visited {
+					newActive.Visited = true
+					actives[newActive.Label] = newActive
+					sendWorkers <- newActive
+				}
 			}
 		}
 	}(collect, sendWorkers)
 
 	// The worker routines receive a node on the receive channel and processes it and
 	// sends the children to the collect channel.
-	// If nothing is received on the receive channel it busy eats one cycle without processing
-	// anything. This is to prevent deadlocks when there is nothing to process left and the goroutines
-	// are left waiting for a never coming node.
+	// The select statement takes a node from the receive channel if there is a value to be received.
+	// If there is none, the select statement blocks until either the timeout channel sends a value
+	// and terminates the goroutine or it receives a value from the receive channel.
+	// When it receives a value on the receive channel the timeout channel is reset.
+	// Timeout is currently 10 Milliseconds, which introduces a lower bound to the processing if more
+	// processing resources (goroutines or depth) is allocated to the simulation.
 	numGoroutines := c.Int("routines")
 	for i := 0; i < numGoroutines; i++ {
 		waitGroup.Add(1)
 		go func(collect chan<- *LabelNode, receive <-chan *LabelNode) {
+			timeout := time.After(10 * time.Millisecond)
 			for x := 0; x < depth; x++ {
 				select {
 				case node := <-receive:
 					for _, childId := range node.Children {
 						collect <- graph[childId]
 					}
-				default:
-					//time.Sleep(100 * time.Millisecond)
-
+					timeout = time.After(10 * time.Millisecond)
+				case <-timeout:
+					waitGroup.Done()
+					return
 				}
 			}
 			waitGroup.Done()
