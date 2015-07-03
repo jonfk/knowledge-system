@@ -136,11 +136,13 @@ func TestSimulation(c *cli.Context) {
 		//spew.Dump(actives)
 		for _, node := range actives {
 			if !node.Visited {
+				node.Visited = true
 				for _, childId := range node.Children {
 					child := graph[childId]
-					actives[child.Label] = child
+					if child.Rule == nil || Interpret(actives, child.Rule) {
+						actives[child.Label] = child
+					}
 				}
-				node.Visited = true
 			}
 		}
 	}
@@ -196,6 +198,15 @@ func ConcurrentTestSimulation(c *cli.Context) {
 
 	waitGroup := new(sync.WaitGroup)
 
+	// Actives mutex is used for reading the actives map in interpreting rules for
+	// nodes with rules.
+	// It is unnecessary to have a mutex on graph since at most 1 goroutine can access a
+	// node that is not yet in actives. Once a node is labeled as visited and added to the
+	// actives, it is sent to the worker routines.
+	// activesMutex := new(sync.RWMutex)
+	// Note: Unnecessary to use mutexes if only one routine interprets
+	// Note: Also unnecessary as long as nodes can only be modified in 1 goroutine
+
 	start := time.Now()
 
 	collect <- graph[0]
@@ -210,8 +221,10 @@ func ConcurrentTestSimulation(c *cli.Context) {
 			case newActive := <-collect:
 				if !newActive.Visited {
 					newActive.Visited = true
-					actives[newActive.Label] = newActive
-					sendWorkers <- newActive
+					if newActive.Rule == nil || Interpret(actives, newActive.Rule) {
+						actives[newActive.Label] = newActive
+						sendWorkers <- newActive
+					}
 				}
 			}
 		}
@@ -255,4 +268,26 @@ func ConcurrentTestSimulation(c *cli.Context) {
 	if c.IsSet("output") {
 		output(graph, c.String("output"))
 	}
+}
+
+func Interpret(actives map[string]*LabelNode, rule []string) bool {
+	for i := range rule {
+		if actives[rule[i]] == nil {
+			return false
+		}
+	}
+	return true
+}
+
+func ConcurrentInterpret(mutex *sync.RWMutex, actives map[string]*LabelNode, rule []string) bool {
+	mutex.RLock()
+	for i := range rule {
+		if actives[rule[i]] == nil {
+			mutex.RUnlock()
+			return false
+		}
+	}
+	mutex.RUnlock()
+	return true
+
 }
