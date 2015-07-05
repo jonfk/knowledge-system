@@ -198,12 +198,18 @@ func ConcurrentTestSimulation(c *cli.Context) {
 
 	waitGroup := new(sync.WaitGroup)
 
+	// NOTE: No locking is used on the data structures until a more elegant solution is found for
+	// concurrent communication on the graph
+
+	// DEPRECATED locks
 	// Actives mutex is used for reading the actives map in interpreting rules for
 	// nodes with rules.
 	// It is unnecessary to have a mutex on graph since at most 1 goroutine can access a
 	// node that is not yet in actives. Once a node is labeled as visited and added to the
 	// actives, it is sent to the worker routines.
 	// activesMutex := new(sync.RWMutex)
+
+	// Assumptions
 	// Note: Unnecessary to use mutexes if only one routine interprets
 	// Note: Also unnecessary as long as nodes can only be modified in 1 goroutine
 
