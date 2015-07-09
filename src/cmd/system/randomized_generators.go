@@ -81,3 +81,41 @@ func generateRandomTree(branchingFactor, size int, seed int64) []*LabelNode {
 	}
 	return nodes
 }
+
+// Generates a B-Tree structure similarly to generateRandomTree but with Rules
+func generateRandomTreeWithRules(branchingFactor, size int, seed int64) []*LabelNode {
+	r := rand.New(rand.NewSource(seed))
+	queue := new(Queue)
+
+	numNodes := r.Intn(size)
+	var nodes []*LabelNode = []*LabelNode{
+		&LabelNode{
+			Id:    0,
+			Label: uuid.NewV4().String()},
+	}
+	queue.Enqueue(nodes[0])
+
+	nodesSoFar := 1
+	for len(nodes) < numNodes {
+		node := queue.Dequeue()
+		if node == nil {
+			break
+		}
+		numChildren := r.Intn(branchingFactor) + 1
+		for i := 0; i < numChildren; i++ {
+			node.Children = append(node.Children, nodesSoFar)
+			newNode := &LabelNode{
+				Id:    nodesSoFar,
+				Label: uuid.NewV4().String()}
+			if r.Int()%10 == 0 {
+				for j := 0; j < r.Intn(branchingFactor); j++ {
+					newNode.Rule = append(newNode.Rule, nodes[r.Intn(nodesSoFar)].Label)
+				}
+			}
+			nodesSoFar++
+			nodes = append(nodes, newNode)
+			queue.Enqueue(newNode)
+		}
+	}
+	return nodes
+}

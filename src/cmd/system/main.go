@@ -115,7 +115,7 @@ func TestSimulation(c *cli.Context) {
 	} else {
 		seed := time.Now().UnixNano()
 		//graph = generateRandomGraph(size, seed)
-		graph = generateRandomTree(4, size, seed)
+		graph = generateRandomTreeWithRules(4, size, seed)
 		size = len(graph)
 		fmt.Println("Graph generated")
 	}
@@ -172,7 +172,7 @@ func ConcurrentTestSimulation(c *cli.Context) {
 	} else {
 		seed := time.Now().UnixNano()
 		//graph = generateRandomGraph(size, seed)
-		graph = generateRandomTree(3, size, seed)
+		graph = generateRandomTreeWithRules(4, size, seed)
 		size = len(graph)
 		fmt.Println("Graph generated")
 	}
