@@ -11,7 +11,8 @@ import (
 func generateRandomGraph(size int, seed int64) []*LabelNode {
 	r := rand.New(rand.NewSource(seed))
 
-	numNodes := r.Intn(size)
+	//numNodes := r.Intn(size)
+	numNodes := size
 	var nodes []*LabelNode
 	var labels []string
 	for i := 0; i < numNodes; i++ {
@@ -54,7 +55,8 @@ func generateRandomTree(branchingFactor, size int, seed int64) []*LabelNode {
 	r := rand.New(rand.NewSource(seed))
 	queue := new(Queue)
 
-	numNodes := r.Intn(size)
+	//numNodes := r.Intn(size)
+	numNodes := size
 	var nodes []*LabelNode = []*LabelNode{
 		&LabelNode{
 			Id:    0,
@@ -87,7 +89,8 @@ func generateRandomTreeWithRules(branchingFactor, size int, seed int64) []*Label
 	r := rand.New(rand.NewSource(seed))
 	queue := new(Queue)
 
-	numNodes := r.Intn(size)
+	//numNodes := r.Intn(size)
+	numNodes := size
 	var nodes []*LabelNode = []*LabelNode{
 		&LabelNode{
 			Id:    0,
